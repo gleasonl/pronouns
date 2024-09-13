@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>About Us</h1>
+    <p>Welcome to our site! This site is designed to help <span class="pronoun-object">you</span> feel comfortable and respected. We believe in creating a welcoming space for everyone.</p>
+    <p>Our aim is to ensure that <span class="pronoun-subject">you</span> always feel seen and respected. Whether <span class="pronoun-subject">you</span> <span class="pronoun-verb">are</span> here to learn more or explore resources, we are here to help.</p>
+    
+    <a href="index.html">Return to Home</a>
+
+    <script>
+        // Function to determine the correct verb based on the subject
+        function getCorrectVerb(subject) {
+            // If subject is 'they', use 'are'
+            if (subject === 'they') {
+                return 'are';
+            }
+            // If a name is provided or pronouns are 'he' or 'she', use 'is'
+            return 'is';
+        }
+
+        // Retrieve the selected name or pronouns from localStorage
+        const storedName = localStorage.getItem('name');
+        const storedPronouns = localStorage.getItem('pronouns');
+
+        if (storedName) {
+            // Apply the name and adjust the verb accordingly
+            document.querySelectorAll('.pronoun-subject').forEach(el => el.textContent = storedName);
+            document.querySelectorAll('.pronoun-object').forEach(el => el.textContent = storedName);
+            document.querySelectorAll('.pronoun-possessive').forEach(el => {
+                // Handle possessive form for names, e.g., "Alice's"
+                if (storedName.endsWith('s')) {
+                    el.textContent = storedName + "'";
+                } else {
+                    el.textContent = storedName + "'s";
+                }
+            });
+            const verb = getCorrectVerb(storedName);
+            document.querySelector('.pronoun-verb').textContent = verb;
+        } else if (storedPronouns) {
+            // Apply the pronouns and adjust the verb accordingly
+            const pronouns = JSON.parse(storedPronouns);
+            document.querySelectorAll('.pronoun-subject').forEach(el => el.textContent = pronouns.subject);
+            document.querySelectorAll('.pronoun-object').forEach(el => el.textContent = pronouns.object);
+            document.querySelectorAll('.pronoun-possessive').forEach(el => el.textContent = pronouns.possessive);
+            const verb = getCorrectVerb(pronouns.subject);
+            document.querySelector('.pronoun-verb').textContent = verb;
+        }
+    </script>
+
+</body>
+</html>

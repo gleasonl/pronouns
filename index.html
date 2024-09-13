@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronoun or Name Selection</title>
+    <style>
+        /* Simple styling for pop-up */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: visible;
+        }
+
+        .popup.hidden {
+            visibility: hidden;
+        }
+
+        .popup-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px;
+        }
+
+        .selected {
+            background-color: #4CAF50;
+            color: white;
+            border: 2px solid #4CAF50;
+        }
+
+        .reset-button {
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            width: 90%;
+            margin-bottom: 10px;
+            padding: 8px;
+        }
+
+        a {
+            font-size: 0.9em;
+            color: #0073e6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Pop-up for pronoun or name selection -->
+    <div class="popup" id="pronoun-popup">
+        <div class="popup-content">
+            <h2>Select how you want to be addressed:</h2>
+            <button class="pronoun-btn" onclick="selectPronouns('he', 'him', 'his', 'his')">He/Him</button>
+            <button class="pronoun-btn" onclick="selectPronouns('she', 'her', 'her', 'hers')">She/Her</button>
+            <button class="pronoun-btn" onclick="selectPronouns('they', 'them', 'their', 'theirs')">They/Them</button>
+            <br>
+            <p>Or enter your custom pronouns:</p>
+            <input type="text" id="custom-subject" placeholder="Subject (e.g., xe)" onfocus="clearOtherSelections('custom')">
+            <input type="text" id="custom-object" placeholder="Object (e.g., xem)">
+            <input type="text" id="custom-possessive" placeholder="Possessive (e.g., xer)">
+            <input type="text" id="custom-possessive-pronoun" placeholder="Possessive Pronoun (e.g., xers)">
+            <br><br>
+            <p>Or enter your name:</p>
+            <input type="text" id="name-input" placeholder="Your name" onfocus="clearOtherSelections('name')">
+            <br><br>
+            <input type="checkbox" id="dont-ask-again"> Don't ask me again
+            <br><br>
+            <button onclick="submitSelection()">Submit</button>
+            <br><br>
+            <a href="https://www.glsen.org/activity/pronouns-guide-glsen" target="_blank">Why are pronouns important?</a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <h1>Welcome!</h1>
+    <p>Hi <span class="pronoun-subject">they</span>! Welcome to the site! This site demonstrates how <span class="pronoun-subject">they</span> can select <span class="pronoun-object">them</span> to display <span class="pronoun-possessive">their</span> preferred information. All preferences, including <span class="pronoun-possessive-pronoun">theirs</span>, will be applied throughout the site.</p>
+    <p>Our aim is to ensure that <span class="pronoun-subject">they</span> always feel seen and respected. Whether <span class="pronoun-subject">they</span> <span class="pronoun-verb">are</span> here to learn more or explore resources, we are here to help.</p>
+
+    <p><span class="pronoun-subject">They</span> <span class="pronoun-verb">are</span> always searching for music that speaks to <span class="pronoun-object">them</span> in unexpected ways. <span class="pronoun-possessive">Their</span> playlist is full of songs that match different parts of <span class="pronoun-possessive">their</span> life, each track reflecting a moment or feeling. When someone shares a new song with <span class="pronoun-object">them</span>, it’s euphoric. The connection <span class="pronoun-subject">they</span> find with certain tracks makes those songs <span class="pronoun-possessive-pronoun">theirs</span>.</p>
+
+    <p><a href="about.html">About Us</a></p>
+    <p><a href="resources.html">Resources</a></p>
+
+    <!-- Reset button to reactivate the popup -->
+    <button class="reset-button" onclick="resetPronouns()">Reset Pronouns/Name</button>
+
+    <script>
+        let selectedPronouns = {};
+        let selectedName = '';
+
+        // Check if name or pronouns and 'don't ask again' preference are saved in localStorage
+        window.onload = () => {
+            const storedPronouns = localStorage.getItem('pronouns');
+            const storedName = localStorage.getItem('name');
+            const dontAskAgain = localStorage.getItem('dontAskAgain');
+            
+            if (dontAskAgain && (storedPronouns || storedName)) {
+                if (storedPronouns) {
+                    const pronouns = JSON.parse(storedPronouns);
+                    updatePronouns(pronouns);
+                } else if (storedName) {
+                    updateName(storedName);
+                }
+                document.getElementById('pronoun-popup').classList.add('hidden');
+            } else {
+                document.getElementById('pronoun-popup').classList.remove('hidden');
+            }
+        };
+
+        // Function to select predefined pronouns but not submit yet
+        function selectPronouns(subject, object, possessive, possessivePronoun) {
+            selectedPronouns = { subject, object, possessive, possessivePronoun };
+            selectedName = ''; // Clear name if pronouns are selected
+
+            document.querySelectorAll('.pronoun-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+
+            clearOtherSelections('pre-selected');
+        }
+
+        // Function to clear other selections (custom pronouns or name)
+        function clearOtherSelections(selectionType) {
+            if (selectionType === 'custom') {
+                document.querySelectorAll('.pronoun-btn').forEach(btn => btn.classList.remove('selected'));
+                selectedPronouns = {}; // Clear selected pronouns
+                selectedName = ''; // Clear name
+                document.getElementById('name-input').value = ''; // Clear name input
+            } else if (selectionType === 'name') {
+                document.querySelectorAll('.pronoun-btn').forEach(btn => btn.classList.remove('selected'));
+                selectedPronouns = {}; // Clear selected pronouns
+                document.getElementById('custom-subject').value = '';
+                document.getElementById('custom-object').value = '';
+                document.getElementById('custom-possessive').value = '';
+                document.getElementById('custom-possessive-pronoun').value = '';
+            }
+        }
+
+        // Function to submit selection (pronouns or name)
+        function submitSelection() {
+            // Check for custom pronouns
+            if (document.getElementById('custom-subject').value) {
+                const subject = document.getElementById('custom-subject').value;
+                const object = document.getElementById('custom-object').value;
+                const possessive = document.getElementById('custom-possessive').value;
+                const possessivePronoun = document.getElementById('custom-possessive-pronoun').value;
+                
+                selectedPronouns = { subject, object, possessive, possessivePronoun };
+                selectedName = ''; // Clear name if custom pronouns are selected
+            }
+
+            // Check if the user entered a name
+            const nameInput = document.getElementById('name-input').value;
+            if (nameInput) {
+                selectedName = nameInput;
+                selectedPronouns = {}; // Clear pronouns if name is entered
+                localStorage.setItem('name', selectedName);
+                updateName(selectedName);
+            } else if (Object.keys(selectedPronouns).length > 0) {
+                localStorage.setItem('pronouns', JSON.stringify(selectedPronouns));
+                updatePronouns(selectedPronouns);
+            }
+
+            // Check if "Don't ask me again" is selected
+            if (document.getElementById('dont-ask-again').checked) {
+                localStorage.setItem('dontAskAgain', true);  // Store the 'don't ask again' preference
+            }
+
+            document.getElementById('pronoun-popup').classList.add('hidden'); // Hide the popup
+        }
+
+        // Function to update the page with the name
+        function updateName(name) {
+            document.querySelectorAll('.pronoun-subject').forEach(el => el.textContent = name);
+            document.querySelectorAll('.pronoun-object').forEach(el => el.textContent = name);
+            
+            // Handle possessive form for names, e.g., "Alice's"
+            document.querySelectorAll('.pronoun-possessive').forEach(el => {
+                if (name.endsWith('s')) {
+                    el.textContent = name + "'";
+                } else {
+                    el.textContent = name + "'s";
+                }
+            });
+            
+            document.querySelectorAll('.pronoun-verb').forEach(el => el.textContent = getCorrectVerb(name));
+        }
+
+        // Function to update the page with pronouns
+        function updatePronouns(pronouns) {
+            document.querySelectorAll('.pronoun-subject').forEach(el => el.textContent = pronouns.subject);
+            document.querySelectorAll('.pronoun-object').forEach(el => el.textContent = pronouns.object);
+            document.querySelectorAll('.pronoun-possessive').forEach(el => el.textContent = pronouns.possessive);
+            document.querySelectorAll('.pronoun-possessive-pronoun').forEach(el => el.textContent = pronouns.possessivePronoun);
+            document.querySelectorAll('.pronoun-verb').forEach(el => el.textContent = getCorrectVerb(pronouns.subject));
+        }
+
+        // Function to reset pronouns or name and show the popup again
+        function resetPronouns() {
+            localStorage.removeItem('pronouns');
+            localStorage.removeItem('name');
+            localStorage.removeItem('dontAskAgain');
+            document.getElementById('pronoun-popup').classList.remove('hidden'); // Show the popup
+        }
+
+        // Function to determine the correct verb ('is' or 'are')
+        function getCorrectVerb(subjectOrName) {
+            // Handle specific plural entities or names that end in 's' (optional)
+            if (subjectOrName.toLowerCase() === 'they' || subjectOrName.endsWith('s')) {
+                return 'are';
+            } else {
+                return 'is';
+            }
+        }
+    </script>
+</body>
+</html>
